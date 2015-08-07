@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo aptitude install bonnie++
+
+echo 'if that failed, you probably want "yum install bonnie++"'
