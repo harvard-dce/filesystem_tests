@@ -1,5 +1,10 @@
 #!/bin/bash
 
-sudo aptitude install bonnie++
+if [ -f '/etc/centos-release' ]; then
+  install_cmd="sudo yum install"
+else
+  sudo aptitude update
+  install_cmd="sudo aptitude install"
+fi
 
-echo 'if that failed, you probably want "yum install bonnie++"'
+$install_cmd bonnie++
