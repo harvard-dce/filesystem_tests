@@ -25,21 +25,26 @@ mkdir -p "$test_root"
 trap "echo; echo \"Be sure to remove the $test_root directory\"; exit" INT TERM
 
 benchmark_bonnie() {
-  command="$bonnie_exe -s ${optimal_file_size}M -d $test_root -f -n 0"
-  echo "Running: $command"
-  $command > benchmark-bonnie-$runtime.txt
+  output="$($bonnie_exe -q -s ${optimal_file_size}M -d $test_root -f -n 0 2> /dev/null)"
+  echo "$runtime,$output" >> benchmark-bonnie.txt
 }
 
 benchmark_a_single_file_of_x_gigabytes() {
   size=$1
-  # (dd if=/dev/zero bs=1M count=$[1024*16] status=none | pv -f -a -t -b > "$test_root/large_file.img") > benchmark-dd-$runtime.txt 2>&1
-  { time dd if=/dev/zero bs=1M count=$[1024*$size] status=none > "$test_root/large_file.img"; } 2> benchmark-file-of-$size-gig-$runtime.txt
+  elapsed_sec=$({ TIMEFORMAT=%R; time dd if=/dev/zero of="$test_root/large_file.img" bs=1M count=$[1024*$size] status=none; } 2>&1 )
+  file_size=$(stat --printf="%s" "$test_root/large_file.img")
+  meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
+  echo "$runtime,$size,$elapsed_sec,$meg_per_sec" >> benchmark-single-files.txt
+  rm "$test_root/large_file.img"
+  sleep 2
 }
 
 benchmark_bonnie
 benchmark_a_single_file_of_x_gigabytes 1
-benchmark_a_single_file_of_x_gigabytes 16
-benchmark_a_single_file_of_x_gigabytes 32
-benchmark_a_single_file_of_x_gigabytes 64
+benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 16]
+benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 8]
+benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024 / 4])
+benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024 / 2])
+benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024])
 
 rm -Rf "$test_root"
