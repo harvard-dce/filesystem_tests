@@ -33,8 +33,13 @@ benchmark_a_single_file_of_x_gigabytes() {
   size=$1
   elapsed_sec=$({ TIMEFORMAT=%R; time dd if=/dev/zero of="$test_root/large_file.img" bs=1M count=$[1024*$size] status=none; } 2>&1 )
   file_size=$(stat --printf="%s" "$test_root/large_file.img")
-  meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
-  echo "$runtime,$size,$elapsed_sec,$meg_per_sec" >> benchmark-single-files.txt
+  write_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
+
+  elapsed_sec=$({ TIMEFORMAT=%R; time cat "$test_root/large_file.img" > /dev/null; } 2>&1 )
+  file_size=$(stat --printf="%s" "$test_root/large_file.img")
+  read_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
+
+  echo "$runtime,$size,$elapsed_sec,$read_meg_per_sec,$write_meg_per_sec" >> benchmark-single-files.txt
   rm "$test_root/large_file.img"
   sleep 2
 }
@@ -43,8 +48,8 @@ benchmark_bonnie
 benchmark_a_single_file_of_x_gigabytes 1
 benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 16]
 benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 8]
-benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024 / 4])
-benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024 / 2])
-benchmark_a_single_file_of_x_gigabytes($[$optimal_file_size / 1024])
+benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 4]
+benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024 / 2]
+benchmark_a_single_file_of_x_gigabytes $[$optimal_file_size / 1024]
 
 rm -Rf "$test_root"
