@@ -3,11 +3,19 @@
 if [ -f '/etc/centos-release' ]; then
   sudo yum install bonnie++
   sudo yum install bc
+  # Provides halockrun, to ensure we don't run more than one test at a time
+  sudo yum install hatools
   curl -L -O http://download.opensuse.org/repositories/home:/tange/CentOS_CentOS-5/noarch/parallel-20150722-2.1.noarch.rpm
   sudo rpm -i parallel*.rpm
+  echo 'Example cron job to run every six hours with overrun protection'
+  echo "1 6,12,18,0 * * * halockrun -cn /tmp/filesystem_test $(pwd)/bin/benchmark.sh <your file system>"
 else
   sudo aptitude update
   sudo aptitude install bonnie++
   sudo aptitude install parallel
+  # Provides run-one, to ensure we don't run more than one test at a time
+  sudo aptitude install run-one
+  echo 'Example cron job to run every six hours with overrun protection'
+  echo "1 6,12,18,0 * * * run-one $(pwd)/bin/benchmark.sh <your file system>"
 fi
 
