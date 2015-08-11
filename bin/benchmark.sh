@@ -50,7 +50,7 @@ benchmark_parallel_files_of_x_gigabytes() {
   file_size=$(stat --printf="%s" "$test_root/large_file-1-$size.img")
   write_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
 
-  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "cat \"$test_root/large_file-{}-$size.img\"" > /dev/null; } 2>&1 )
+  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "cat \"$test_root/large_file-{}-$size.img\" > /dev/null"; } 2>&1 )
   read_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
 
   echo "$runtime,$parallelism,$size,$elapsed_sec,$read_meg_per_sec,$write_meg_per_sec" >> "$files_output"
