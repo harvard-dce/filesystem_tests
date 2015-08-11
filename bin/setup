@@ -1,10 +1,12 @@
 #!/bin/bash
 
 if [ -f '/etc/centos-release' ]; then
-  install_cmd="sudo yum install"
+  sudo yum install bonnie++
+  curl -L -O http://download.opensuse.org/repositories/home:/tange/CentOS_CentOS-5/noarch/parallel-20150722-2.1.noarch.rpm
+  sudo rpm -i parallel*.rpm
 else
   sudo aptitude update
-  install_cmd="sudo aptitude install"
+  sudo aptitude install bonnie++
+  sudo aptitude install parallel
 fi
 
-$install_cmd bonnie++
