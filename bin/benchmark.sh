@@ -7,11 +7,6 @@ files_output="benchmark-files.txt"
 
 total_ram=$(grep MemTotal /proc/meminfo | awk -F' ' '{print $2}')
 optimal_file_size=$(echo "($total_ram / 1024) * 2" | bc)
-bonnie_exe=$(which bonnie++)
-if [ -z "$bonnie_exe" ]; then
-  bonnie_exe="/usr/sbin/bonnie++"
-fi
-
 if [ -z "$parallelism" ]; then
   parallelism=3
 fi
@@ -37,12 +32,6 @@ mkdir -p "$test_root"
 
 trap "echo; echo \"Be sure to remove the $test_root directory\"; exit" INT TERM
 
-benchmark_bonnie() {
-  runtime=$(date +"%s")
-  output="$($bonnie_exe -q -s ${optimal_file_size}M -d $test_root -f -n 0 2> /dev/null)"
-  echo "$runtime,$output" >> benchmark-bonnie.txt
-}
-
 benchmark_parallel_files_of_x_gigabytes() {
   size=$1
   parallel_actions=$2
@@ -59,7 +48,6 @@ benchmark_parallel_files_of_x_gigabytes() {
   sleep 2
 }
 
-benchmark_bonnie
 benchmark_parallel_files_of_x_gigabytes 1 $parallelism
 benchmark_parallel_files_of_x_gigabytes $[$optimal_file_size / 1024 / 16] $parallelism
 benchmark_parallel_files_of_x_gigabytes $[$optimal_file_size / 1024 / 8] $parallelism

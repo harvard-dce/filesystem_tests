@@ -12,12 +12,11 @@ A simple bash harness to benchmark network-bound filesystem operations.
 
 ## Tests we run
 
-Read './bin/benchmark.sh' for more details. Summary:
+Read './bin/benchmark.sh' for more details.
 
-* We run the non-CPU bound tests from `bonnie++`,
-* We copy and then read increasingly large files in parallel, up to 2x max RAM
-  to ensure we're not seeing buffer cache interference (eventually, at the
-  large file sizes).
+We copy and then read increasingly large files in parallel, up to 2x max RAM to
+ensure we're not seeing buffer cache interference (eventually, at the large
+file sizes).
 
 Output is dumped into a format suitable for import into a spreadsheet in the
 directory you run `./bin/benchmark.sh` from. You should be able to run this

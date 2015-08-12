@@ -1,7 +1,6 @@
 #!/bin/bash
 
 if [ -f '/etc/centos-release' ]; then
-  sudo yum install bonnie++
   sudo yum install bc
   # Provides halockrun, to ensure we don't run more than one test at a time
   sudo yum install hatools
@@ -11,7 +10,6 @@ if [ -f '/etc/centos-release' ]; then
   echo "1 6,12,18,0 * * * cd $(pwd) && /usr/bin/halockrun -cn /tmp/filesystem_test ./bin/benchmark.sh <your file system>"
 else
   sudo aptitude update
-  sudo aptitude install bonnie++
   sudo aptitude install parallel
   # Provides run-one, to ensure we don't run more than one test at a time
   sudo aptitude install run-one
