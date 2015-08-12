@@ -2,7 +2,6 @@
 
 filesystem="$1"
 parallelism="$2"
-runtime=$(date +"%s")
 
 files_output="benchmark-files.txt"
 
@@ -39,6 +38,7 @@ mkdir -p "$test_root"
 trap "echo; echo \"Be sure to remove the $test_root directory\"; exit" INT TERM
 
 benchmark_bonnie() {
+  runtime=$(date +"%s")
   output="$($bonnie_exe -q -s ${optimal_file_size}M -d $test_root -f -n 0 2> /dev/null)"
   echo "$runtime,$output" >> benchmark-bonnie.txt
 }
@@ -46,6 +46,7 @@ benchmark_bonnie() {
 benchmark_parallel_files_of_x_gigabytes() {
   size=$1
   parallel_actions=$2
+  runtime=$(date +"%s")
   elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "dd if=/dev/zero of=\"$test_root/large_file-{}-$size.img\" bs=1M count=$[1024*$size] status=none"; } 2>&1 )
   file_size=$(stat --printf="%s" "$test_root/large_file-1-$size.img")
   write_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
