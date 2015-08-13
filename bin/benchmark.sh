@@ -31,7 +31,6 @@ if [ ! -e "${files_output_base}direct.csv" ]; then
 fi
 
 test_root="$filesystem/filesystem_tests_tmp"
-rm -Rf "$test_root"
 mkdir -p "$test_root"
 
 trap "echo; echo \"Be sure to remove the $test_root directory\"; exit" INT TERM
@@ -70,5 +69,3 @@ benchmark_parallel_files_of_x_gigabytes 10 $parallelism 'direct'
 benchmark_parallel_files_of_x_gigabytes 10 $parallelism ''
 benchmark_parallel_files_of_x_gigabytes 20 $parallelism 'direct'
 benchmark_parallel_files_of_x_gigabytes 20 $parallelism ''
-
-rm -Rf "$test_root"
