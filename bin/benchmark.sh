@@ -2,8 +2,11 @@
 
 filesystem="$1"
 parallelism="$2"
+files_output_base="$3"
 
-files_output_base="benchmark"
+if [ -z "$files_output_base" ]; then
+  files_output_base="benchmark"
+fi
 
 if [ -z "$parallelism" ]; then
   parallelism=3
@@ -28,7 +31,6 @@ if [ ! -e "${files_output_base}direct.csv" ]; then
 fi
 
 test_root="$filesystem/filesystem_tests_tmp"
-
 rm -Rf "$test_root"
 mkdir -p "$test_root"
 
@@ -38,7 +40,8 @@ benchmark_parallel_files_of_x_gigabytes() {
   size=$1
   parallel_actions=$2
   dd_flags=$3
-
+  filename_base="file-$$-$RANDOM"
+  runtime=$(date +"%s")
   if [ ! -z "$dd_flags" ]; then
     of_dd_flag="oflag=direct"
     if_dd_flag="iflag=direct"
@@ -47,16 +50,15 @@ benchmark_parallel_files_of_x_gigabytes() {
     if_dd_flag=""
   fi
 
-  runtime=$(date +"%s")
-  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "dd if=/dev/zero of=\"$test_root/large_file-{}-$size.img\" bs=1M count=$[1024*$size] $of_dd_flag status=none"; } 2>&1 )
-  file_size=$(stat --printf="%s" "$test_root/large_file-1-$size.img")
+  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "dd if=/dev/zero of=\"$test_root/$filename_base-{}-$size.img\" bs=1M count=$[1024*$size] $of_dd_flag status=none"; } 2>&1 )
+  file_size=$(stat --printf="%s" "$test_root/$filename_base-1-$size.img")
   write_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
 
-  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "dd if=\"$test_root/large_file-{}-$size.img\" bs=1M status=none $if_dd_flag > /dev/null"; } 2>&1 )
+  elapsed_sec=$({ TIMEFORMAT=%R; time seq 1 $parallel_actions | parallel -k "dd if=\"$test_root/$filename_base-{}-$size.img\" bs=1M status=none $if_dd_flag > /dev/null"; } 2>&1 )
   read_meg_per_sec=$(echo "scale=2; $file_size / 1024 / 1024 / $elapsed_sec" | bc)
 
   echo "$runtime,$parallelism,$dd_flags,$size,$elapsed_sec,$read_meg_per_sec,$write_meg_per_sec" >> "${files_output_base}${dd_flags}.csv"
-  rm $test_root/large_file-*-$size.img
+  rm $test_root/$filename_base-*-$size.img
   sleep 2
 }
 
