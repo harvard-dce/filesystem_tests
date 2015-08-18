@@ -59,7 +59,7 @@ benchmark_parallel_files_of_x_gigabytes() {
 
   total_fs_size=$(du -BM --max-depth=0 "$test_root" | cut -f1 -d'	')
 
-  echo "$runtime,$parallelism,$total_fs_size,$dd_flags,$size,$read_elapsed_sec,$write_elapsed_sec,$read_meg_per_sec,$write_meg_per_sec" >> "${files_output_base}${dd_flags}.csv"
+  echo "$runtime,$parallel_actions,$total_fs_size,$dd_flags,$size,$read_elapsed_sec,$write_elapsed_sec,$read_meg_per_sec,$write_meg_per_sec" >> "${files_output_base}${dd_flags}.csv"
   if [ "$keep_files" != "keep" ]; then
     rm $test_root/$filename_base-*-$size.img
   fi
